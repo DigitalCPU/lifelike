@@ -36,6 +36,16 @@
             if (user) {
                 document.getElementById("sidebar").style.display = "flex";
                 document.getElementById("loginSection").style.display = "none";
+                
+                // Load user data
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    document.getElementById("displayName").innerText = userDoc.data().displayName || "User";
+                    const profilePicUrl = userDoc.data().profilePic;
+                    if (profilePicUrl) {
+                        document.getElementById("profilePic").src = profilePicUrl;
+                    }
+                }
             } else {
                 document.getElementById("sidebar").style.display = "none";
                 document.getElementById("loginSection").style.display = "block";
@@ -69,6 +79,10 @@
         .content {
             flex-grow: 1;
             padding: 20px;
+            transition: margin-left 0.3s;
+        }
+        .sidebar.active + .content {
+            margin-left: 250px;
         }
         button {
             padding: 10px;
@@ -88,7 +102,12 @@
 <body>
     <div id="sidebar" class="sidebar">
         <button onclick="toggleSidebar()">☰</button>
+        <img id="profilePic" src="" alt="Profile Picture">
+        <h3 id="displayName">User</h3>
         <button onclick="signOut(auth).then(() => location.reload())">Log Out</button>
+        <button onclick="alert('Go Live feature coming soon!')">Go Live!</button>
+        <button onclick="alert('Stopping session feature coming soon!')">Stop Session</button>
+        <button onclick="alert('Recording feature coming soon!')">Record Now!</button>
     </div>
     
     <div class="content">
