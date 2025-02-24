@@ -9,7 +9,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
         
         // Firebase configuration
         const firebaseConfig = {
@@ -25,7 +24,6 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
         // Load user profile
         onAuthStateChanged(auth, async (user) => {
@@ -36,7 +34,8 @@
                     document.getElementById("displayName").value = userDoc.data().displayName || "";
                     const profilePicUrl = userDoc.data().profilePic;
                     if (profilePicUrl) {
-                        document.getElementById("profilePic").src = profilePicUrl + "?timestamp=" + new Date().getTime(); // Force image refresh
+                        document.getElementById("profilePic").src = profilePicUrl;
+                        document.getElementById("profilePicUrl").value = profilePicUrl;
                     }
                 }
             } else {
@@ -50,29 +49,11 @@
             if (!user) return;
 
             const displayName = document.getElementById("displayName").value;
+            const profilePicUrl = document.getElementById("profilePicUrl").value;
             await updateProfile(user, { displayName });
-            await setDoc(doc(db, "users", user.uid), { displayName }, { merge: true });
+            await setDoc(doc(db, "users", user.uid), { displayName, profilePic: profilePicUrl }, { merge: true });
+            document.getElementById("profilePic").src = profilePicUrl;
             alert("Profile updated successfully!");
-        };
-
-        // Upload profile picture
-        window.uploadProfilePic = async function(event) {
-            const user = auth.currentUser;
-            if (!user) return;
-            
-            const file = event.target.files[0];
-            if (!file || !['image/gif', 'image/bmp', 'image/jpeg', 'image/png'].includes(file.type)) {
-                alert("Invalid file type. Please upload a GIF, BMP, JPG, or PNG file.");
-                return;
-            }
-            
-            const storageRef = ref(storage, `profile_pictures/${user.uid}`);
-            await uploadBytes(storageRef, file);
-            const downloadURL = await getDownloadURL(storageRef);
-            
-            await setDoc(doc(db, "users", user.uid), { profilePic: downloadURL }, { merge: true });
-            document.getElementById("profilePic").src = downloadURL + "?timestamp=" + new Date().getTime(); // Force refresh
-            alert("Profile picture updated successfully!");
         };
 
         // Logout function
@@ -110,7 +91,7 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
         }
-        input, file {
+        input {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -145,7 +126,8 @@
     <div class="profile-container">
         <p><strong>Email:</strong> <span id="email"></span></p>
         <img id="profilePic" src="" alt="Profile Picture">
-        <input type="file" accept="image/gif,image/bmp,image/jpeg,image/png" onchange="uploadProfilePic(event)">
+        <p>Enter Profile Picture URL:</p>
+        <input id="profilePicUrl" type="text" placeholder="Paste image URL here">
         <p><strong>Display Name:</strong></p>
         <input id="displayName" type="text" placeholder="Enter display name">
         <button onclick="saveProfile()">Save Changes</button>
