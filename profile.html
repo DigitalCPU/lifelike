@@ -69,6 +69,11 @@
         window.goHome = function() {
             window.location.href = "index.html";
         };
+
+        // Navigate to dashboard
+        window.goToDashboard = function() {
+            window.location.href = "https://digitalcpu.github.io/lifelike/dashboard.html";
+        };
     </script>
     <style>
         body {
@@ -132,6 +137,7 @@
         <input id="displayName" type="text" placeholder="Enter display name">
         <button onclick="saveProfile()">Save Changes</button>
         <button onclick="goHome()">Go to Home Page</button>
+        <button onclick="goToDashboard()">Go to Dashboard</button> <!-- New Dashboard Button -->
         <button onclick="logout()">Log Out</button>
     </div>
 </body>
