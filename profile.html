@@ -1,1 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - LifeLike</title>
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHi0cT2Pk_aymI2yFr_TrFQJfMWfrZ6C8",
+            authDomain: "lifelike-cd485.firebaseapp.com",
+            projectId: "lifelike-cd485",
+            storageBucket: "lifelike-cd485.firebasestorage.app",
+            messagingSenderId: "621008241447",
+            appId: "1:621008241447:web:3920e1234de6383fcd5f02"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Load user profile
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById("email").innerText = user.email;
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    document.getElementById("displayName").value = userDoc.data().displayName || "";
+                }
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        // Save profile changes
+        window.saveProfile = async function() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const displayName = document.getElementById("displayName").value;
+            await updateProfile(user, { displayName });
+            await setDoc(doc(db, "users", user.uid), { displayName }, { merge: true });
+            alert("Profile updated successfully!");
+        };
+
+        // Logout function
+        window.logout = function() {
+            signOut(auth).then(() => {
+                window.location.href = "index.html";
+            }).catch(error => {
+                alert(error.message);
+            });
+        };
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+            background-color: #121212;
+            color: #ffffff;
+        }
+        header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .profile-container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background-color: #1f1f1f;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            background-color: #1f1f1f;
+            color: #ffffff;
+            border: 1px solid #ffffff;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #333333;
+        }
+    </style>
+</head>
+<body>
+    <header>User Profile</header>
+    <div class="profile-container">
+        <p><strong>Email:</strong> <span id="email"></span></p>
+        <p><strong>Display Name:</strong></p>
+        <input id="displayName" type="text" placeholder="Enter display name">
+        <button onclick="saveProfile()">Save Changes</button>
+        <button onclick="logout()">Log Out</button>
+    </div>
+</body>
+</html>
 
