@@ -7,8 +7,8 @@
     <script type="module">
         // Import Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         
         // Firebase configuration
         const firebaseConfig = {
@@ -34,32 +34,13 @@
         // Load sidebar only if the user is logged in
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                document.getElementById("sidebar").style.display = "block";
+                document.getElementById("sidebar").style.display = "flex";
                 document.getElementById("loginSection").style.display = "none";
-                
-                // Load user data
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (userDoc.exists()) {
-                    document.getElementById("displayName").innerText = userDoc.data().displayName || "User";
-                    const profilePicUrl = userDoc.data().profilePic;
-                    if (profilePicUrl) {
-                        document.getElementById("profilePic").src = profilePicUrl;
-                    }
-                }
             } else {
                 document.getElementById("sidebar").style.display = "none";
                 document.getElementById("loginSection").style.display = "block";
             }
         });
-
-        // Logout function
-        window.logout = function() {
-            signOut(auth).then(() => {
-                window.location.reload();
-            }).catch(error => {
-                alert(error.message);
-            });
-        };
     </script>
     <style>
         body {
@@ -88,11 +69,6 @@
         .content {
             flex-grow: 1;
             padding: 20px;
-            margin-left: 0;
-            transition: margin-left 0.3s;
-        }
-        .sidebar.active + .content {
-            margin-left: 250px;
         }
         button {
             padding: 10px;
@@ -112,12 +88,7 @@
 <body>
     <div id="sidebar" class="sidebar">
         <button onclick="toggleSidebar()">☰</button>
-        <img id="profilePic" src="" alt="Profile Picture">
-        <h3 id="displayName">User</h3>
-        <button onclick="logout()">Log Out</button>
-        <button onclick="alert('Go Live feature coming soon!')">Go Live!</button>
-        <button onclick="alert('Stopping session feature coming soon!')">Stop Session</button>
-        <button onclick="alert('Recording feature coming soon!')">Record Now!</button>
+        <button onclick="signOut(auth).then(() => location.reload())">Log Out</button>
     </div>
     
     <div class="content">
@@ -126,8 +97,10 @@
         <p>The social experience like never before.</p>
         
         <div id="loginSection">
-            <button onclick="window.location.href='login.html'">Login</button>
-            <button onclick="window.location.href='register.html'">Register</button>
+            <input type="text" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).catch(alert)">Login</button>
+            <button onclick="createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).then(cred => setDoc(doc(db, 'users', cred.user.uid), {})).catch(alert)">Register</button>
         </div>
     </div>
 </body>
