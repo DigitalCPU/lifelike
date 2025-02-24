@@ -36,7 +36,7 @@
                     document.getElementById("displayName").value = userDoc.data().displayName || "";
                     const profilePicUrl = userDoc.data().profilePic;
                     if (profilePicUrl) {
-                        document.getElementById("profilePic").src = profilePicUrl;
+                        document.getElementById("profilePic").src = profilePicUrl + "?timestamp=" + new Date().getTime(); // Force image refresh
                     }
                 }
             } else {
@@ -71,7 +71,7 @@
             const downloadURL = await getDownloadURL(storageRef);
             
             await setDoc(doc(db, "users", user.uid), { profilePic: downloadURL }, { merge: true });
-            document.getElementById("profilePic").src = downloadURL;
+            document.getElementById("profilePic").src = downloadURL + "?timestamp=" + new Date().getTime(); // Force refresh
             alert("Profile picture updated successfully!");
         };
 
