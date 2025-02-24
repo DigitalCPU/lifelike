@@ -57,6 +57,11 @@
                 alert(error.message);
             });
         };
+
+        // Navigate to home page
+        window.goHome = function() {
+            window.location.href = "index.html";
+        };
     </script>
     <style>
         body {
@@ -110,8 +115,8 @@
         <p><strong>Display Name:</strong></p>
         <input id="displayName" type="text" placeholder="Enter display name">
         <button onclick="saveProfile()">Save Changes</button>
+        <button onclick="goHome()">Go to Home Page</button>
         <button onclick="logout()">Log Out</button>
     </div>
 </body>
 </html>
-
