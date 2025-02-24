@@ -4,6 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LifeLike - Social Network</title>
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHi0cT2Pk_aymI2yFr_TrFQJfMWfrZ6C8",
+            authDomain: "lifelike-cd485.firebaseapp.com",
+            projectId: "lifelike-cd485",
+            storageBucket: "lifelike-cd485.firebasestorage.app",
+            messagingSenderId: "621008241447",
+            appId: "1:621008241447:web:3920e1234de6383fcd5f02"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        
+        // Register function
+        window.register = function() {
+            const email = prompt("Enter email:");
+            const password = prompt("Enter password:");
+            createUserWithEmailAndPassword(auth, email, password)
+                .then(userCredential => {
+                    alert("Registration successful!");
+                })
+                .catch(error => {
+                    alert(error.message);
+                });
+        };
+
+        // Login function
+        window.login = function() {
+            const email = prompt("Enter email:");
+            const password = prompt("Enter password:");
+            signInWithEmailAndPassword(auth, email, password)
+                .then(userCredential => {
+                    alert("Login successful!");
+                })
+                .catch(error => {
+                    alert(error.message);
+                });
+        };
+
+        // Logout function
+        window.logout = function() {
+            signOut(auth).then(() => {
+                alert("Logged out successfully!");
+            }).catch(error => {
+                alert(error.message);
+            });
+        };
+        
+        // Track authentication state
+        onAuthStateChanged(auth, (user) => {
+            const status = document.getElementById("status");
+            if (user) {
+                status.innerText = `Logged in as ${user.email}`;
+            } else {
+                status.innerText = "Not logged in";
+            }
+        });
+    </script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -28,22 +92,11 @@
 </head>
 <body>
     <header>Welcome to LifeLike</header>
+    <p id="status">Not logged in</p>
     <div class="buttons">
         <button onclick="register()">Register</button>
         <button onclick="login()">Log In</button>
         <button onclick="logout()">Log Out</button>
     </div>
-    
-    <script>
-        function register() {
-            alert('Register function coming soon.');
-        }
-        function login() {
-            alert('Login function coming soon.');
-        }
-        function logout() {
-            alert('Logout function coming soon.');
-        }
-    </script>
 </body>
 </html>
