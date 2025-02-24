@@ -77,6 +77,22 @@
             flex-direction: column;
             align-items: center;
         }
+        .friends-list, .followers-list {
+            width: 100%;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .friends-list h4, .followers-list h4 {
+            margin-bottom: 5px;
+        }
+        .friend, .follower {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin: 5px;
+            display: inline-block;
+            background-color: gray;
+        }
         .content {
             flex-grow: 1;
             padding: 20px;
@@ -89,7 +105,7 @@
         }
         button {
             padding: 10px;
-            margin: 10px;
+            margin: 5px;
             font-size: 16px;
             cursor: pointer;
             background-color: #1f1f1f;
@@ -109,6 +125,27 @@
         <p id="email"></p>
         <button onclick="goToProfile()">Edit Profile</button>
         <button onclick="logout()">Log Out</button>
+        
+        <div class="friends-list">
+            <h4>Friends</h4>
+            <div class="friend"></div>
+            <div class="friend"></div>
+            <div class="friend"></div>
+            <div class="friend"></div>
+        </div>
+        
+        <div class="followers-list">
+            <h4>Followers</h4>
+            <div class="follower"></div>
+            <div class="follower"></div>
+            <div class="follower"></div>
+            <div class="follower"></div>
+        </div>
+        
+        <button onclick="alert('Inbox feature coming soon!')">Inbox</button>
+        <button onclick="alert('User search coming soon!')">Search Users</button>
+        <button onclick="alert('Settings coming soon!')">Settings</button>
+        <button onclick="alert('Hardware settings coming soon!')">Hardware Settings</button>
     </div>
     <div class="content">
         <h1>Welcome to Your Dashboard</h1>
