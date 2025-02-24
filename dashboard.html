@@ -77,15 +77,28 @@
             flex-direction: column;
             align-items: center;
         }
-        .friends-list, .followers-list {
+        .friends-list, .followers-list, .following-list {
             width: 100%;
             margin-top: 10px;
             text-align: center;
+            position: relative;
         }
-        .friends-list h4, .followers-list h4 {
+        .friends-list h4, .followers-list h4, .following-list h4 {
             margin-bottom: 5px;
+            position: relative;
         }
-        .friend, .follower {
+        .friends-list h4:hover::after, .followers-list h4:hover::after, .following-list h4:hover::after {
+            content: "See all";
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: -20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        .friend, .follower, .following {
             width: 50px;
             height: 50px;
             border-radius: 50%;
@@ -132,6 +145,8 @@
             <div class="friend"></div>
             <div class="friend"></div>
             <div class="friend"></div>
+            <div class="friend"></div>
+            <div class="friend"></div>
         </div>
         
         <div class="followers-list">
@@ -139,7 +154,13 @@
             <div class="follower"></div>
             <div class="follower"></div>
             <div class="follower"></div>
-            <div class="follower"></div>
+        </div>
+        
+        <div class="following-list">
+            <h4>Following</h4>
+            <div class="following"></div>
+            <div class="following"></div>
+            <div class="following"></div>
         </div>
     </div>
     <div class="content">
