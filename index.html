@@ -7,7 +7,7 @@
     <script type="module">
         // Import Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         
         // Firebase configuration
         const firebaseConfig = {
@@ -22,11 +22,12 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        
+        const provider = new GoogleAuthProvider();
+
         // Register function
         window.register = function() {
-            const email = prompt("Enter email:");
-            const password = prompt("Enter password:");
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
             createUserWithEmailAndPassword(auth, email, password)
                 .then(userCredential => {
                     alert("Registration successful!");
@@ -38,13 +39,24 @@
 
         // Login function
         window.login = function() {
-            const email = prompt("Enter email:");
-            const password = prompt("Enter password:");
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
             signInWithEmailAndPassword(auth, email, password)
                 .then(userCredential => {
                     alert("Login successful!");
                 })
                 .catch(error => {
+                    alert(error.message);
+                });
+        };
+
+        // Google Sign-In function
+        window.googleSignIn = function() {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    alert("Google Sign-In successful!");
+                })
+                .catch((error) => {
                     alert(error.message);
                 });
         };
@@ -97,14 +109,27 @@
         button:hover {
             background-color: #333333;
         }
+        .input-field {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ffffff;
+            background-color: #1f1f1f;
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
     <header>Welcome to LifeLike</header>
     <p id="status">Not logged in</p>
+    <input id="email" type="email" class="input-field" placeholder="Enter Email">
+    <input id="password" type="password" class="input-field" placeholder="Enter Password">
     <div class="buttons">
         <button onclick="register()">Register</button>
         <button onclick="login()">Log In</button>
+        <button onclick="googleSignIn()">Sign In with Google</button>
         <button onclick="logout()">Log Out</button>
     </div>
 </body>
