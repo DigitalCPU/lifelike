@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - LifeLike</title>
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHi0cT2Pk_aymI2yFr_TrFQJfMWfrZ6C8",
+            authDomain: "lifelike-cd485.firebaseapp.com",
+            projectId: "lifelike-cd485",
+            storageBucket: "lifelike-cd485.appspot.com",
+            messagingSenderId: "621008241447",
+            appId: "1:621008241447:web:3920e1234de6383fcd5f02"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Load user data
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById("email").innerText = user.email;
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    document.getElementById("displayName").innerText = userDoc.data().displayName || "User";
+                    const profilePicUrl = userDoc.data().profilePic;
+                    if (profilePicUrl) {
+                        document.getElementById("profilePic").src = profilePicUrl;
+                    }
+                }
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        // Logout function
+        window.logout = function() {
+            signOut(auth).then(() => {
+                window.location.href = "index.html";
+            }).catch(error => {
+                alert(error.message);
+            });
+        };
+
+        // Navigate to profile page
+        window.goToProfile = function() {
+            window.location.href = "profile.html";
+        };
+
+        // Navigate to home page
+        window.goHome = function() {
+            window.location.href = "index.html";
+        };
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            background-color: #121212;
+            color: #ffffff;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: #1f1f1f;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+        img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #1f1f1f;
+            color: white;
+            border: 1px solid white;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #333333;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <img id="profilePic" src="" alt="Profile Picture">
+        <h3 id="displayName">User</h3>
+        <p id="email"></p>
+        <button onclick="goToProfile()">Edit Profile</button>
+        <button onclick="logout()">Log Out</button>
+    </div>
+    <div class="content">
+        <h1>Welcome to Your Dashboard</h1>
+        <p>Here you can access your features.</p>
+        <button onclick="goHome()">Go to Home Page</button>
+    </div>
+</body>
+</html>
