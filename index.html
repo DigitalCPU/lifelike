@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeLike - Social Network</title>
+    <title>LifeLike</title>
     <script type="module">
         // Import Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDHi0cT2Pk_aymI2yFr_TrFQJfMWfrZ6C8",
             authDomain: "lifelike-cd485.firebaseapp.com",
             projectId: "lifelike-cd485",
-            storageBucket: "lifelike-cd485.firebasestorage.app",
+            storageBucket: "lifelike-cd485.appspot.com",
             messagingSenderId: "621008241447",
             appId: "1:621008241447:web:3920e1234de6383fcd5f02"
         };
@@ -24,128 +24,103 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
 
-        // Register function
-        window.register = async function() {
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                await setDoc(doc(db, "users", user.uid), {
-                    email: user.email,
-                    displayName: ""
-                });
-                alert("Registration successful!");
-            } catch (error) {
-                alert(error.message);
-            }
+        // Sidebar toggle function
+        window.toggleSidebar = function() {
+            const sidebar = document.getElementById("sidebar");
+            sidebar.classList.toggle("active");
         };
 
-        // Login function
-        window.login = async function() {
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                alert("Login successful!");
-                window.location.href = "profile.html";
-            } catch (error) {
-                alert(error.message);
-            }
-        };
-
-        // Google Sign-In function
-        window.googleSignIn = async function() {
-            try {
-                const result = await signInWithPopup(auth, provider);
-                const user = result.user;
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (!userDoc.exists()) {
-                    await setDoc(doc(db, "users", user.uid), {
-                        email: user.email,
-                        displayName: user.displayName || ""
-                    });
-                }
-                alert("Google Sign-In successful!");
-                window.location.href = "profile.html";
-            } catch (error) {
-                alert(error.message);
-            }
-        };
-
-        // Logout function
-        window.logout = function() {
-            signOut(auth).then(() => {
-                alert("Logged out successfully!");
-                window.location.href = "index.html";
-            }).catch(error => {
-                alert(error.message);
-            });
-        };
-        
-        // Track authentication state
-        onAuthStateChanged(auth, (user) => {
-            const status = document.getElementById("status");
+        // Load sidebar only if the user is logged in
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                status.innerText = `Logged in as ${user.email}`;
+                document.getElementById("sidebar").style.display = "flex";
+                document.getElementById("loginSection").style.display = "none";
+                
+                // Load user data
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    document.getElementById("displayName").innerText = userDoc.data().displayName || "User";
+                    const profilePicUrl = userDoc.data().profilePic;
+                    if (profilePicUrl) {
+                        document.getElementById("profilePic").src = profilePicUrl;
+                    }
+                }
             } else {
-                status.innerText = "Not logged in";
+                document.getElementById("sidebar").style.display = "none";
+                document.getElementById("loginSection").style.display = "block";
             }
         });
     </script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 50px;
             background-color: #121212;
             color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
         }
-        header {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
+        .sidebar {
+            width: 250px;
+            background-color: #1f1f1f;
+            padding: 20px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            position: fixed;
+            height: 100%;
+            left: -250px;
+            transition: 0.3s;
         }
-        .buttons {
-            margin-top: 20px;
+        .sidebar.active {
+            left: 0;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            transition: margin-left 0.3s;
+        }
+        .sidebar.active + .content {
+            margin-left: 250px;
         }
         button {
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 10px;
             margin: 5px;
+            font-size: 16px;
             cursor: pointer;
             background-color: #1f1f1f;
-            color: #ffffff;
-            border: 1px solid #ffffff;
+            color: white;
+            border: 1px solid white;
             border-radius: 5px;
         }
         button:hover {
             background-color: #333333;
         }
-        .input-field {
-            display: block;
-            margin: 10px auto;
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ffffff;
-            background-color: #1f1f1f;
-            color: #ffffff;
-        }
     </style>
 </head>
 <body>
-    <header>Welcome to LifeLike</header>
-    <p id="status">Not logged in</p>
-    <input id="email" type="email" class="input-field" placeholder="Enter Email">
-    <input id="password" type="password" class="input-field" placeholder="Enter Password">
-    <div class="buttons">
-        <button onclick="register()">Register</button>
-        <button onclick="login()">Log In</button>
-        <button onclick="googleSignIn()">Sign In with Google</button>
-        <button onclick="logout()">Log Out</button>
+    <div id="sidebar" class="sidebar">
+        <button onclick="toggleSidebar()">☰</button>
+        <img id="profilePic" src="" alt="Profile Picture">
+        <h3 id="displayName">User</h3>
+        <button onclick="signOut(auth).then(() => location.reload())">Log Out</button>
+        <button onclick="alert('Go Live feature coming soon!')">Go Live!</button>
+        <button onclick="alert('Stopping session feature coming soon!')">Stop Session</button>
+        <button onclick="alert('Recording feature coming soon!')">Record Now!</button>
+    </div>
+    
+    <div class="content">
+        <button onclick="toggleSidebar()">☰ Toggle Sidebar</button>
+        <h1>Welcome to LifeLike</h1>
+        <p>The social experience like never before.</p>
+        
+        <div id="loginSection">
+            <input type="text" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).then(() => window.location.href = 'https://digitalcpu.github.io/lifelike/dashboard.html').catch(alert)">Login</button>
+            <button onclick="createUserWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).then(cred => setDoc(doc(db, 'users', cred.user.uid), {})).catch(alert)">Register</button>
+        </div>
     </div>
 </body>
 </html>
