@@ -31,8 +31,12 @@
                 document.getElementById("email").innerText = user.email;
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 if (userDoc.exists()) {
-                    document.getElementById("displayName").value = userDoc.data().displayName || "";
-                    const profilePicUrl = userDoc.data().profilePic;
+                    const userData = userDoc.data();
+                    document.getElementById("displayName").value = userData.displayName || "";
+                    document.getElementById("bio").value = userData.bio || "";
+                    document.getElementById("location").value = userData.location || "";
+                    document.getElementById("interests").value = userData.interests || "";
+                    const profilePicUrl = userData.profilePic;
                     if (profilePicUrl) {
                         document.getElementById("profilePic").src = profilePicUrl;
                         document.getElementById("profilePicUrl").value = profilePicUrl;
@@ -49,9 +53,18 @@
             if (!user) return;
 
             const displayName = document.getElementById("displayName").value;
+            const bio = document.getElementById("bio").value;
+            const location = document.getElementById("location").value;
+            const interests = document.getElementById("interests").value;
             const profilePicUrl = document.getElementById("profilePicUrl").value;
             await updateProfile(user, { displayName });
-            await setDoc(doc(db, "users", user.uid), { displayName, profilePic: profilePicUrl }, { merge: true });
+            await setDoc(doc(db, "users", user.uid), { 
+                displayName, 
+                bio, 
+                location, 
+                interests, 
+                profilePic: profilePicUrl 
+            }, { merge: true });
             document.getElementById("profilePic").src = profilePicUrl;
             alert("Profile updated successfully!");
         };
@@ -96,7 +109,7 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
         }
-        input {
+        input, textarea {
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -135,9 +148,15 @@
         <input id="profilePicUrl" type="text" placeholder="Paste image URL here">
         <p><strong>Display Name:</strong></p>
         <input id="displayName" type="text" placeholder="Enter display name">
+        <p><strong>Bio:</strong></p>
+        <textarea id="bio" placeholder="Enter a short bio"></textarea>
+        <p><strong>Location:</strong></p>
+        <input id="location" type="text" placeholder="Enter your location">
+        <p><strong>Interests:</strong></p>
+        <input id="interests" type="text" placeholder="Enter your interests">
         <button onclick="saveProfile()">Save Changes</button>
         <button onclick="goHome()">Go to Home Page</button>
-        <button onclick="goToDashboard()">Go to Dashboard</button> <!-- New Dashboard Button -->
+        <button onclick="goToDashboard()">Go to Dashboard</button>
         <button onclick="logout()">Log Out</button>
     </div>
 </body>
