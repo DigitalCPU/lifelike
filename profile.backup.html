@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - LifeLike</title>
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHi0cT2Pk_aymI2yFr_TrFQJfMWfrZ6C8",
+            authDomain: "lifelike-cd485.firebaseapp.com",
+            projectId: "lifelike-cd485",
+            storageBucket: "lifelike-cd485.appspot.com",
+            messagingSenderId: "621008241447",
+            appId: "1:621008241447:web:3920e1234de6383fcd5f02"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Load user profile
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById("email").innerText = user.email;
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    document.getElementById("displayName").value = userData.displayName || "";
+                    document.getElementById("bio").value = userData.bio || "";
+                    document.getElementById("location").value = userData.location || "";
+                    document.getElementById("interests").value = userData.interests || "";
+                    const profilePicUrl = userData.profilePic;
+                    if (profilePicUrl) {
+                        document.getElementById("profilePic").src = profilePicUrl;
+                        document.getElementById("profilePicUrl").value = profilePicUrl;
+                    }
+                }
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        // Save profile changes
+        window.saveProfile = async function() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            const displayName = document.getElementById("displayName").value;
+            const bio = document.getElementById("bio").value;
+            const location = document.getElementById("location").value;
+            const interests = document.getElementById("interests").value;
+            const profilePicUrl = document.getElementById("profilePicUrl").value;
+            await updateProfile(user, { displayName });
+            await setDoc(doc(db, "users", user.uid), { 
+                displayName, 
+                bio, 
+                location, 
+                interests, 
+                profilePic: profilePicUrl 
+            }, { merge: true });
+            document.getElementById("profilePic").src = profilePicUrl;
+            alert("Profile updated successfully!");
+        };
+
+        // Logout function
+        window.logout = function() {
+            signOut(auth).then(() => {
+                window.location.href = "index.html";
+            }).catch(error => {
+                alert(error.message);
+            });
+        };
+
+        // Navigate to home page
+        window.goHome = function() {
+            window.location.href = "index.html";
+        };
+
+        // Navigate to dashboard
+        window.goToDashboard = function() {
+            window.location.href = "https://digitalcpu.github.io/lifelike/dashboard.html";
+        };
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+            background-color: #121212;
+            color: #ffffff;
+        }
+        header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .profile-container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background-color: #1f1f1f;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            background-color: #333;
+            color: white;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            background-color: #1f1f1f;
+            color: #ffffff;
+            border: 1px solid #ffffff;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #333333;
+        }
+        img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>User Profile</header>
+    <div class="profile-container">
+        <p><strong>Email:</strong> <span id="email"></span></p>
+        <img id="profilePic" src="" alt="Profile Picture">
+        <p>Enter Profile Picture URL:</p>
+        <input id="profilePicUrl" type="text" placeholder="Paste image URL here">
+        <p><strong>Display Name:</strong></p>
+        <input id="displayName" type="text" placeholder="Enter display name">
+        <p><strong>Bio:</strong></p>
+        <textarea id="bio" placeholder="Enter a short bio"></textarea>
+        <p><strong>Location:</strong></p>
+        <input id="location" type="text" placeholder="Enter your location">
+        <p><strong>Interests:</strong></p>
+        <input id="interests" type="text" placeholder="Enter your interests">
+        <button onclick="saveProfile()">Save Changes</button>
+        <button onclick="goHome()">Go to Home Page</button>
+        <button onclick="goToDashboard()">Go to Dashboard</button>
+        <button onclick="logout()">Log Out</button>
+    </div>
+</body>
+</html>
