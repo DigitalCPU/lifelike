@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeLike - Social Network</title>
+    <script type="module">
+        // Import Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDHi0cT2Pk_aymI2yFr_TrFQJfMWfrZ6C8",
+            authDomain: "lifelike-cd485.firebaseapp.com",
+            projectId: "lifelike-cd485",
+            storageBucket: "lifelike-cd485.appspot.com", // FIXED typo here
+            messagingSenderId: "621008241447",
+            appId: "1:621008241447:web:3920e1234de6383fcd5f02"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        // Register function
+        window.register = async function() {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+            if (email === "" || password === "") {
+                alert("Please enter an email and password.");
+                return;
+            }
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Save user data to Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    email: user.email,
+                    displayName: user.displayName || "New User"
+                });
+
+                alert("Registration successful! Logging you in...");
+                window.location.href = "profile.html";
+            } catch (error) {
+                alert("Registration failed: " + error.message);
+                console.error(error);
+            }
+        };
+
+        // Login function
+        window.login = async function() {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+            if (email === "" || password === "") {
+                alert("Please enter an email and password.");
+                return;
+            }
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                alert("Login successful!");
+                window.location.href = "profile.html";
+            } catch (error) {
+                alert("Login failed: " + error.message);
+                console.error(error);
+            }
+        };
+
+        // Google Sign-In function
+        window.googleSignIn = async function() {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                // Check if user exists in Firestore
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (!userDoc.exists()) {
+                    await setDoc(doc(db, "users", user.uid), {
+                        email: user.email,
+                        displayName: user.displayName || "Google User"
+                    });
+                }
+
+                alert("Google Sign-In successful!");
+                window.location.href = "profile.html";
+            } catch (error) {
+                alert("Google Sign-In failed: " + error.message);
+                console.error(error);
+            }
+        };
+
+        // Logout function
+        window.logout = function() {
+            signOut(auth).then(() => {
+                alert("Logged out successfully!");
+                window.location.href = "index.html";
+            }).catch(error => {
+                alert("Logout failed: " + error.message);
+                console.error(error);
+            });
+        };
+        
+        // Track authentication state
+        onAuthStateChanged(auth, (user) => {
+            const status = document.getElementById("status");
+            if (user) {
+                status.innerText = `Logged in as ${user.email}`;
+            } else {
+                status.innerText = "Not logged in";
+            }
+        });
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+            background-color: #121212;
+            color: #ffffff;
+        }
+        header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .buttons {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px; 
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #1f1f1f;
+            color: #ffffff;
+            border: 1px solid #ffffff;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #333333;
+        }
+        .input-field {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ffffff;
+            background-color: #1f1f1f;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <header>Welcome to LifeLike</header>
+    <p id="status">Not logged in</p>
+    <input id="email" type="email" class="input-field" placeholder="Enter Email">
+    <input id="password" type="password" class="input-field" placeholder="Enter Password">
+    <div class="buttons">
+        <button onclick="register()">Register</button>
+        <button onclick="login()">Log In</button>
+        <button onclick="googleSignIn()">Sign In with Google</button>
+         <button onclick="goToDashboard()">Go to Dashboard</button>
+        <button onclick="logout()">Log Out</button>
+    </div>
+</body>
+</html>
